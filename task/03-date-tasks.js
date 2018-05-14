@@ -22,7 +22,8 @@
  *    'Sun, 17 May 1998 03:00:00 GMT+01' => Date()
  */
 function parseDataFromRfc2822(value) {
-    throw new Error('Not implemented');
+    var date = new Date(value);
+    return date;
 }
 
 /**
@@ -37,7 +38,8 @@ function parseDataFromRfc2822(value) {
  *    '2016-01-19T08:07:37Z' => Date()
  */
 function parseDataFromIso8601(value) {
-    throw new Error('Not implemented');
+    var date = new Date(value);
+    return date;
 }
 
 
@@ -56,7 +58,9 @@ function parseDataFromIso8601(value) {
  *    Date(2015,1,1)    => false
  */
 function isLeapYear(date) {
-    throw new Error('Not implemented');
+    var year = date.getFullYear();
+    if (((year % 4 == 0)&(year % 100 != 0))||(year % 400 == 0)) {return true;}
+    else {return false;}    
 }
 
 
@@ -76,7 +80,25 @@ function isLeapYear(date) {
  *    Date(2000,1,1,10,0,0),  Date(2000,1,1,15,20,10,453)   => "05:20:10.453"
  */
 function timeSpanToString(startDate, endDate) {
-    throw new Error('Not implemented');
+    let msecPerMinute = 1000 * 60;  
+    let msecPerHour = msecPerMinute * 60;  
+    let msecPerDay = msecPerHour * 24;  
+
+    let interval = endDate.getTime() - startDate.getTime()
+
+    let days = Math.floor(interval / msecPerDay );  
+    interval = interval - (days * msecPerDay ); 
+
+    let hours = Math.floor(interval / msecPerHour );  
+    interval = interval - (hours * msecPerHour );  
+
+    let minutes = Math.floor(interval / msecPerMinute );  
+    interval = interval - (minutes * msecPerMinute );  
+
+    let seconds = Math.floor(interval / 1000 ); 
+
+    return ("0" + hours).slice(-2) + ":" + ("0" + minutes).slice(-2) + ":" + ("0" + seconds).slice(-2) + "." + ("00" + interval).slice(-3);
+
 }
 
 
@@ -94,7 +116,26 @@ function timeSpanToString(startDate, endDate) {
  *    Date.UTC(2016,3,5,21, 0) => Math.PI/2
  */
 function angleBetweenClockHands(date) {
-    throw new Error('Not implemented');
+    let minute = date.getUTCMinutes() % 60;
+    let hour = date.getUTCHours() % 12;
+
+    // first workout the minute angle
+    var minAngle = 360*(minute/60);
+  // then work out hour angle
+  // first the hour then the hour + mins
+    var hourAngle = (360*(hour/12))+((360/12)*(minute/60));
+   
+    let angle = Math.abs(hourAngle - minAngle);
+
+    if (angle > 180){
+        angle = 360 - angle;
+    }
+
+    angle = angle * Math.PI / 180;
+    return angle;
+
+
+    
 }
 
 
