@@ -71,7 +71,10 @@ function* getFibonacciSequence() {
     let a = 0, b = 1;
     while (true) {
         yield a;
-        b = [a + b, a = b][0];
+        let tmp = a;
+        a = b;  
+        b = a + tmp;
+        //b = [a + b, a = b][0];
     }
 }
 
@@ -168,19 +171,39 @@ function* breadthTraversalTree(root) {
  *   [ 1, 3, 5, ... ], [ -1 ] => [ -1, 1, 3, 5, ...]
  */
 function* mergeSortedSequences(source1, source2) {
-    source1 = source1();
-    source2 = source2();
-    let val1 = source1.next();
-    let val2 = source2.next();
-    while (!val1.done || !val2.done) {
-        if (val2.done || val1.value < val2.value) {
-            yield val1.value;
-            val1 = source1.next();
-        } else {
-            yield val2.value;
-            val2 = source2.next();
+    let s1 = source1();
+    let s2 = source2();
+
+    let prev = s1.next();
+    let next = s2.next();
+
+    while (1) {
+        if (prev.value === undefined || next.value === undefined) break;
+
+        if (prev.value < next.value) {
+            yield prev.value;
+            prev = s1.next();
+            continue;
         }
+        else {
+            yield next.value;
+            next = s2.next();
+            continue;
+        }    
     }
+    
+    while (prev.value !== undefined) {
+        yield prev.value;
+        prev = s1.next();
+        continue;
+    }
+
+    while (next.value !== undefined) {
+        yield next.value;
+        next = s2.next();
+        continue;
+    }
+
 }
 
 

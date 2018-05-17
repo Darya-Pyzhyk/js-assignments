@@ -130,56 +130,198 @@ const PokerRank = {
     HighCard: 0
 }
 
-function getPokerHandRank(hand) {
-    const getShape = card => card[card.length - 1];
-    const rankToNum = rank => isNaN(parseInt(rank)) ? (11 + ['J', 'Q', 'K', 'A'].indexOf(rank)) : parseInt(rank);
-    const getRank = card => rankToNum(card.length == 3 ? card.slice(0, 2) : card[0]);
-    const isSameShape = cards => cards.every(card => getShape(card) == getShape(cards[0]));
+function sortArr(arr_numbers){
+    let numbers = ["2", "3", "4", "5", "6", 
+                       "7", "8", "9", "10", "J", "Q", "K", "A"];
+    for(let i = 0; i < arr_numbers.length; i++){
+        if(arr_numbers[i] == 2){
+        numbers = ["A", "2", "3", "4", "5", "6", 
+                       "7", "8", "9", "10", "J", "Q", "K"];      
+        break;
+        }  
+    }    
+    return arr_numbers.sort(function (val1, val2){
+                return findIndexInArr(val1, numbers) - findIndexInArr(val2, numbers);
+            });
+}
 
-    function countRanks(cards) {
-        const counters = Array.from({length: 13}, elem => 0);
-        for (let card of cards) {
-            counters[getRank(card) - 2]++;
+function findIndexInArr(val, array){
+    for(let i = 0; i < array.length; i++){
+        if(array[i] == val){
+            return i;
         }
-        return counters;
     }
+}
 
-    function isStraight (cards) {
-        const sorted = cards.map(card => getRank(card)).sort((a, b) => a - b);
-        if (sorted[0] == '2' && sorted[sorted.length - 1] == '14') {
-            sorted.unshift(sorted.pop());
-        }
-        for (let i = 1; i < sorted.length; i++) {
-            const diff = sorted[i] - sorted[i - 1];
-            if (diff != 1 && diff != -12) {
-                return false;
-            }
-        }
+function isBigger(val1, val2){
+    let numbers = ["2", "3", "4", "5", "6", 
+                    "7", "8", "9", "10", "J", "Q", "K", "A"];
+    return findIndexInArr(val1, numbers) - findIndexInArr(val2, numbers);
+}
 
+function isBiggerByOne(val1, val2){
+    let numbers = ["A", "2", "3", "4", "5", "6", 
+                    "7", "8", "9", "10", "J", "Q", "K", "A"];
+    if(numbers[findIndexInArr(val1, numbers) + 1] == val2){
         return true;
     }
+    return false;
+}
 
-    const ranks = countRanks(hand);
-    switch(true) {
-        case (isStraight(hand) && isSameShape(hand)):
-            return PokerRank.StraightFlush;
-        case (ranks.indexOf(4) != -1):
-            return PokerRank.FourOfKind;
-        case (ranks.indexOf(3) != -1 && ranks.indexOf(2) != -1):
-            return PokerRank.FullHouse;
-        case isSameShape(hand):
-            return PokerRank.Flush;
-        case isStraight(hand):
-            return PokerRank.Straight;
-        case ranks.indexOf(3) != -1:
-            return PokerRank.ThreeOfKind;
-        case ranks.indexOf(2) != -1 && ranks.lastIndexOf(2) != ranks.indexOf(2):
-            return PokerRank.TwoPairs;
-        case ranks.indexOf(2) != -1:
-            return PokerRank.OnePair;
-        default:
-            return PokerRank.HighCard;
+
+function isStraightFlush(arr_numbers, arr_shapes){
+    for(let i = 0; i < arr_shapes.length-1; i++){
+        if(arr_shapes[i] != arr_shapes[i+1]){
+            return false;
+        }
     }
+    arr_numbers = sortArr(arr_numbers);
+    for(let i = 0; i < arr_numbers.length-1; i++){
+        if(!isBiggerByOne(arr_numbers[i], arr_numbers[i+1])){
+            return false;
+        }
+    }
+    return true;
+}
+
+function isFourOfKind(arr_numbers){
+    let count_equal = 0;
+    for(let i = 0; i < arr_numbers.length; i++){
+        if ((i != 1) && (arr_numbers[i] == arr_numbers[1])){
+            count_equal++;
+        }
+    }
+    if(count_equal == 3) { return true; }
+}
+
+function isFullHouse(arr_numbers){
+    arr_numbers = sortArr(arr_numbers);
+    let count_equal1 = 0;
+    let count_equal2 = 0;
+    for(let i = 0; i < arr_numbers.length; i++){
+        if((i != 1) && (arr_numbers[i] == arr_numbers[1])){
+            count_equal1++;
+        }
+    }
+
+    for(let i = 0; i < arr_numbers.length; i++){
+        if((i != 3) && (arr_numbers[i] == arr_numbers[3])){
+            count_equal2++;
+        }
+    }
+    if (((count_equal2 == 2) && (count_equal1 == 1)) || ((count_equal1 == 2) && (count_equal2 == 1))){
+        return true;
+    }
+    return false;
+}
+
+function isFlush(arr_shapes){
+    for(let i = 1; i < arr_shapes.length; i++){
+        if (arr_shapes[0] != arr_shapes[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
+
+
+function isStraight(arr_numbers){
+    arr_numbers = sortArr(arr_numbers);
+    for(let i = 0; i < arr_numbers.length-1; i++){
+        if (!isBiggerByOne(arr_numbers[i], arr_numbers[i+1])){
+            return false;
+        }
+    }
+    return true;
+}
+
+function isThreeOfKind(arr_numbers){
+    arr_numbers = sortArr(arr_numbers);
+    let count_equal = 0;
+    for(let i = 0; i < arr_numbers.length; i++){
+        if((i != 2) && (arr_numbers[2] == arr_numbers[i])){
+            count_equal++;
+        }
+    }
+    if(count_equal == 2){
+        return true;
+    }
+    return false;
+}
+
+function isTwoPairs(arr_numbers){
+    let count_equal = false;
+    let low = 0;
+    while((low < arr_numbers.length) && (!count_equal)){
+        let i = low+1;
+        while(i < arr_numbers.length){
+            if(arr_numbers[low] == arr_numbers[i]){
+                arr_numbers[low] = null;
+                arr_numbers[i++] = null;
+                count_equal = true;
+                break;
+            }
+            i++;
+        }
+        low++;
+    } 
+    low = 0;
+    while((count_equal)&&(low < arr_numbers.length)){
+        let i = low+1;
+        while(i < arr_numbers.length){
+            if((arr_numbers[low] == arr_numbers[i]) 
+                && (arr_numbers[low] != null) 
+                && (arr_numbers[i] != null)){
+                return true;
+            }
+            i++;
+        }
+        low++;
+    } 
+    return false;
+}
+
+function isOnePair(arr_numbers){
+    let low = 0;
+    while(low < arr_numbers.length){
+        let i = low+1;
+        while(i < arr_numbers.length){
+            if(arr_numbers[low] == arr_numbers[i++]){
+                return true;
+            }
+        }
+        low++;
+    }  
+    return false;
+}
+
+
+function getPokerHandRank(hand) {
+
+    let pokerRankStr = [];
+    let arr_numbers = [];
+    let arr_shapes = [];
+    for(let i = 0; i < hand.length; i++){
+        let temp = hand[i].split('');
+        arr_numbers[i] = temp[0];
+        if(temp[1] == '0') {
+            arr_numbers[i] += temp[1];
+            arr_shapes[i] = temp[2];
+        } else{
+            arr_shapes[i] = temp[1];
+        }
+    }
+
+    if (isStraightFlush(arr_numbers, arr_shapes)) { return  PokerRank.StraightFlush; }
+    if (isFourOfKind(arr_numbers)) { return  PokerRank.FourOfKind; }
+    if (isFullHouse(arr_numbers)) { return  PokerRank.FullHouse; }
+    if (isFlush(arr_shapes)) { return  PokerRank.Flush; }
+    if (isStraight(arr_numbers)) { return  PokerRank.Straight; }
+    if (isThreeOfKind(arr_numbers)) { return  PokerRank.ThreeOfKind; }
+    if (isTwoPairs(arr_numbers)) { return  PokerRank.TwoPairs; }
+    if (isOnePair(arr_numbers)) { return  PokerRank.OnePair; }
+    return PokerRank.HighCard;
 }
 
 

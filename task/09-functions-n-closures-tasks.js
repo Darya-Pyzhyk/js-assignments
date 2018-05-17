@@ -27,8 +27,8 @@
  *
  */
 function getComposition(f,g) {
-    function ins(x) {return f(g(x))}
-    return ins;
+    function func(x) {return f(g(x))}
+    return func;
 }
 
 
@@ -131,7 +131,8 @@ function retry(func, attempts) {
         for (var i = 0; i < attempts; i++) {
             try {
                 return func();    
-            } catch (e) {
+            }
+            catch (e) {
                 continue;
             }
         } 
@@ -210,7 +211,11 @@ function partialUsingArguments(fn) {
  *   getId10() => 11
  */
 function getIdGeneratorFunction(startFrom) {
-    return () => startFrom++;
+    let x = startFrom;
+    let plusOne = function(){
+        return x++;
+    }
+    return plusOne;
 }
 
 
